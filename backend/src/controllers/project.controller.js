@@ -11,7 +11,7 @@ export async function createProject(req,res) {
 
     try {
         const project = await createOrgProject(userId,orgId,name);
-        res.status(200).json(project);
+        res.json(project);
     } catch (err) {
         res.status(403).json({error:"Not authorized"});
     }
@@ -24,7 +24,7 @@ export async function listProjects(req,res) {
     
     try {
         const projects = listOrgProjects(userId,orgId);
-        res.status(200).json(projects);
+        res.json(projects);
     } catch (err) {
         res.status(403).json({error:"Not Authorized"});
     }
