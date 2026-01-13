@@ -4,6 +4,7 @@ import pool from "./db/index.js"
 import authRoutes from "./routes/auth.routes.js"
 import { authMiddleware } from "./middleware/auth.middleware.js";
 import projectRoutes from "./routes/project.routes.js";
+import taskRoutes from "./routes/task.routes.js";
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use("/auth",authRoutes);
 app.use("/orgs", projectRoutes);
+app.use("/orgs/:orgId/projects/:projectId", taskRoutes);
 
 app.get("/health", async (req,res) => {
     try {
