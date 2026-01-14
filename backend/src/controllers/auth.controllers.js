@@ -1,3 +1,5 @@
+// auth.controllers.js
+
 import bcrypt from "bcrypt";
 import {v4 as uuidv4} from "uuid";
 import pool from "../db/index.js"

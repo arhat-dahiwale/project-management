@@ -1,3 +1,5 @@
+// project.controller.js
+
 import { createOrgProject, listOrgProjects } from "../services/project.service.js";
 
 export async function createProject(req,res) {
@@ -23,7 +25,7 @@ export async function listProjects(req,res) {
     const {orgId} = req.params;
     
     try {
-        const projects = listOrgProjects(userId,orgId);
+        const projects = await listOrgProjects(userId,orgId);
         res.json(projects);
     } catch (err) {
         res.status(403).json({error:"Not Authorized"});

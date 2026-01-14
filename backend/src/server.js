@@ -1,3 +1,4 @@
+// server.js
 import express from "express";
 import "dotenv/config";
 import pool from "./db/index.js"

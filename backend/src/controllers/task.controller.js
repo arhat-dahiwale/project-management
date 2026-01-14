@@ -1,3 +1,4 @@
+// task.controller.js
 import { createProjectTask,deleteProjectTask,updateProjectTask,listProjectTasks } from "../services/task.service.js";
 
 export async function getTasks(req,res) {
@@ -15,7 +16,7 @@ export async function getTasks(req,res) {
 export async function createTask(req,res) {
     const userId = req.user.id;
     const {orgId,projectId} = req.params;
-    const {title,description,status} = req.body;
+    const {title,description} = req.body;
 
     if (!title || !description) {
         return res.status(400).json({error:"Enter required fields"});
