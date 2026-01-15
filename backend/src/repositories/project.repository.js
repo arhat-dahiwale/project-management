@@ -1,6 +1,6 @@
 // project.repository.js
 
-import pool from "../db";
+import pool from "../db/index.js";
 
 export async function createProject(orgId, name) {
     const result = await pool.query(
@@ -13,7 +13,7 @@ export async function createProject(orgId, name) {
     return result.rows[0];
 }
 
-export async function listProjects(orgId, ) {
+export async function listProjects(orgId) {
     const result = await pool.query(
         `SELECT id, name
         FROM projects
@@ -23,4 +23,15 @@ export async function listProjects(orgId, ) {
     );
 
     return result.rows;
+}
+
+export async function getProjectById(projectId) {
+    const result = await pool.query(
+        `SELECT id
+         FROM projects
+         WHERE id = $1`,
+        [projectId]
+    );
+
+    return result.rows[0] || null;
 }

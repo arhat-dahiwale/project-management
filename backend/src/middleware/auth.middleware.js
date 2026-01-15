@@ -8,6 +8,10 @@ export function authMiddleware(req,res,next) {
         return res.status(401).json({error:"Missing authorization header"});
     }
 
+    if (!authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "Invalid authorization format" });
+    }
+
     const token = authHeader.split(" ")[1];
 
     try {
@@ -15,7 +19,7 @@ export function authMiddleware(req,res,next) {
         req.user = {id:payload.userId};
         next();
     } catch {
-        res.status(401).json({error:"Invalid or expired token"});
+        return res.status(401).json({error:"Invalid or expired token"});
     }
 
 }

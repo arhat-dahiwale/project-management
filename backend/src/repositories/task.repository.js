@@ -1,13 +1,15 @@
 // task.repository.js
 import pool from "../db/index.js";
 
-export async function listTasksByProject(projectId) {
+export async function listTasksByProject(projectId, {limit,offset}) {
     const result = await pool.query(
         `SELECT id, title, status, description, created_at
         FROM tasks 
-        WHERE project_id=$1
-        ORDER BY created_at DESC`,
-        [projectId]
+        WHERE project_id=$1 AND deleted_at IS NULL
+        ORDER BY created_at DESC
+        LIMIT $2
+        OFFSET $3`,
+        [projectId,limit,offset]
     );
 
     return result.rows;
@@ -41,12 +43,13 @@ export async function updateTask(projectId, taskId,title,description,status) {
 }
 
 export async function deleteTask(projectId,taskId) {
-    const res = await pool.query(
-        `DELETE FROM tasks 
-        WHERE id=$1 AND project_id=$2
+    const result = await pool.query(
+        `UPDATE tasks 
+        SET deleted_at=now()
+        WHERE id=$1 AND project_id=$2 AND deleted_at=NULL
         RETURNING id`,
         [taskId,projectId]
     );
 
-    return res.rows.length > 0;
+    return result.rows.length > 0;
 }

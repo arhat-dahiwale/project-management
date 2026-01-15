@@ -21,12 +21,12 @@ export async function register(req, res) {
         [uuidv4(),email,hashPass]
     );
 
-    res.status(201).json({message:"User registered"});
+    return res.status(201).json({message:"User registered"});
   } catch (err) {
     if (err.code === "23505") {
-        res.status(409).json({error:"Email already exists"});
+        return res.status(409).json({error:"Email already exists"});
     }
-    res.status(500).json({error:"Internal server error"});
+    return res.status(500).json({error:"Internal server error"});
   }
 }
 
@@ -43,17 +43,17 @@ export async function login(req, res) {
   );
 
   if (result.rows.length === 0) {
-    res.status(401).json({error:"Invalid Credentials"});
+    return res.status(401).json({error:"Invalid Credentials"});
   }
 
   const user = result.rows[0];
-  const isValid = bcrypt.compare(password,user.password_hash);
+  const isValid = await bcrypt.compare(password,user.password_hash);
 
   if (!isValid) {
-    res.status(401).json({error:"Invalid Credentials"});
+    return res.status(401).json({error:"Invalid Credentials"});
   }
 
   const token = jwt.sign({userId:user.id},process.env.JWT_SECRET,{expiresIn:"1h"});
-  res.json(token);
+  return res.json({token});
   
 }

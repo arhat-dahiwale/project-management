@@ -4,12 +4,29 @@ import { createProjectTask,deleteProjectTask,updateProjectTask,listProjectTasks 
 export async function getTasks(req,res) {
     const userId = req.user.id;
     const {orgId,projectId} = req.params;
-
     try {
-        const tasks = await listProjectTasks(userId,orgId,projectId);
-        res.json(tasks);
+        const limit = Math.min(parseInt(req.params.limit) || 20,100);
+        const offset = parseInt(req.params.offset) || 0;
+        const tasks = await listProjectTasks(userId,orgId,projectId, {limit,offset});
+
+        return res.json(tasks);
     } catch (err) {
-        res.status(403).json(err);
+        if (err?.code === "TASK_NOT_FOUND") {
+            return res.status(404).json({error:err.code});
+        }
+        if (err?.code === "NOT_A_MEMBER" || err?.code === "INSUFFICIENT_ROLE") {
+            return res.status(403).json({ error: err.code });
+        }
+        if (err?.code === "INVALID_TASK_UPDATE") {
+            return res.status(400).json({ error: err.code });
+        }
+        if (err?.code === "PROJECT_NOT_FOUND") {
+            return res.status(404).json({ error: err.code });
+        }
+
+
+
+        return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
     }
 }
 
@@ -24,9 +41,19 @@ export async function createTask(req,res) {
 
     try {
         const task = await createProjectTask(userId,orgId,projectId,title,description);
-        res.json(task);
+        return res.json(task);
     } catch (err) {
-        res.status(403).json(err);
+        if (err?.code === "TASK_NOT_FOUND") {
+            return res.status(404).json({error:err.code});
+        }
+        if (err?.code === "NOT_A_MEMBER" || err?.code === "INSUFFICIENT_ROLE") {
+            return res.status(403).json({ error: err.code });
+        }
+        if (err?.code === "PROJECT_NOT_FOUND") {
+            return res.status(404).json({ error: err.code });
+        }
+
+        return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
     }
 }
 
@@ -41,9 +68,19 @@ export async function updateTask(req,res) {
 
     try {
         const task = await updateProjectTask(userId,orgId,projectId,taskId,title,description,status);
-        res.json(task);
+        return res.json(task);
     } catch (err) {
-        res.status(403).json(err);
+        if (err?.code === "TASK_NOT_FOUND") {
+            return res.status(404).json({error:err.code});
+        }
+        if (err?.code === "NOT_A_MEMBER" || err?.code === "INSUFFICIENT_ROLE") {
+            return res.status(403).json({ error: err.code });
+        }
+        if (err?.code === "PROJECT_NOT_FOUND") {
+            return res.status(404).json({ error: err.code });
+        }
+
+        return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
     }
 }
 
@@ -53,8 +90,18 @@ export async function removeTask(req,res) {
 
     try {
         await deleteProjectTask(userId,orgId,projectId,taskId);
-        res.json({success:true});
+        return res.status(204).end();
     } catch (err) {
-        res.status(403).json({error:"User not authorized"});
+        if (err?.code === "TASK_NOT_FOUND") {
+            return res.status(404).json({error:err.code});
+        }
+        if (err?.code === "NOT_A_MEMBER" || err?.code === "INSUFFICIENT_ROLE") {
+            return res.status(403).json({ error: err.code });
+        }
+        if (err?.code === "PROJECT_NOT_FOUND") {
+            return res.status(404).json({ error: err.code });
+        }
+
+        return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
     }
 }

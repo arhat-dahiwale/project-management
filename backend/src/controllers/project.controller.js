@@ -13,9 +13,13 @@ export async function createProject(req,res) {
 
     try {
         const project = await createOrgProject(userId,orgId,name);
-        res.json(project);
+        return res.status(201).json(project);
     } catch (err) {
-        res.status(403).json({error:"Not authorized"});
+        if (err?.code === "NOT_A_MEMBER" || err?.code === "INSUFFICIENT_ROLE") {
+            return res.status(403).json({ error: err.code });
+        }
+
+        return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
     }
 }
 
@@ -26,8 +30,13 @@ export async function listProjects(req,res) {
     
     try {
         const projects = await listOrgProjects(userId,orgId);
-        res.json(projects);
+        return res.json(projects);
     } catch (err) {
-        res.status(403).json({error:"Not Authorized"});
+        
+        if (err?.code === "NOT_A_MEMBER" || err?.code === "INSUFFICIENT_ROLE") {
+            return res.status(403).json({ error: err.code });
+        }
+
+        return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
     }
 }
