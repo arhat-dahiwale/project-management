@@ -27,7 +27,7 @@ export async function listProjects(orgId) {
 
 export async function getProjectById(projectId) {
     const result = await pool.query(
-        `SELECT id
+        `SELECT id, organization_id
          FROM projects
          WHERE id = $1`,
         [projectId]

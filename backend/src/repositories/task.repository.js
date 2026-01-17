@@ -1,15 +1,22 @@
 // task.repository.js
 import pool from "../db/index.js";
 
-export async function listTasksByProject(projectId, {limit,offset}) {
+export async function listTasksByProject(projectId, {limit,cursor}) {
+    const params = [projectId];
+    let cursorCondition = "";
+    if (cursor) {
+        params.push(cursor);
+        cursorCondition = `AND created_at < $2`;
+    }
+    params.push(limit);
+
     const result = await pool.query(
         `SELECT id, title, status, description, created_at
         FROM tasks 
-        WHERE project_id=$1 AND deleted_at IS NULL
+        WHERE project_id=$1 AND deleted_at IS NULL ${cursorCondition}
         ORDER BY created_at DESC
-        LIMIT $2
-        OFFSET $3`,
-        [projectId,limit,offset]
+        LIMIT $${params.length}`,
+        params
     );
 
     return result.rows;

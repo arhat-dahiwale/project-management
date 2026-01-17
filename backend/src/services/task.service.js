@@ -5,15 +5,20 @@ import { getProjectById } from "../repositories/project.repository.js";
 
 
 // returns all the tasks in a project and if there are none then it returns []
-export async function listProjectTasks(userId, orgId, projectId,{limit,offset}) {
+export async function listProjectTasks(userId, orgId, projectId,{limit,cursor}) {
     await requireOrgRole(userId,orgId,["admin","member"]);
 
     const project = await getProjectById(projectId);
-    if (!project) {
+    if (!project || project.organization_id!=orgId) {
         throw { code: "PROJECT_NOT_FOUND" };
     }
 
-    return listTasksByProject(projectId,{limit, offset});
+    const tasks = await listTasksByProject(projectId,{limit, cursor});
+    const nextCursor = tasks.length === limit ? tasks[tasks.length-1].created_at : null;
+    return {
+        data : tasks,
+        nextCursor
+    }
 }
 
 // returns created task if successful else returns []
@@ -22,7 +27,7 @@ export async function createProjectTask(userId,orgId,projectId,title,description
     const status = "todo";
 
     const project = await getProjectById(projectId);
-    if (!project) {
+    if (!project || project.organization_id!=orgId) {
         throw { code: "PROJECT_NOT_FOUND" };
     }
 
@@ -47,9 +52,16 @@ export async function updateProjectTask(userId,orgId,projectId,taskId,title,desc
     }
 
     const project = await getProjectById(projectId);
-    if (!project) {
+    if (!project || project.organization_id!=orgId) {
         throw { code: "PROJECT_NOT_FOUND" };
     }
+
+    const ALLOWED_STATUSES = ["todo", "in_progress", "done"];
+
+    if (!ALLOWED_STATUSES.includes(status)) {
+        throw { code: "INVALID_TASK_UPDATE" };
+    }
+
 
     const updatedTask = await updateTask(projectId,taskId,title,description,status);
 
@@ -65,7 +77,7 @@ export async function deleteProjectTask(userId,orgId,projectId,taskId) {
     await requireOrgRole(userId,orgId,["admin"]);
 
     const project = await getProjectById(projectId);
-    if (!project) {
+    if (!project || project.organization_id!=orgId) {
         throw { code: "PROJECT_NOT_FOUND" };
     }
 

@@ -4,10 +4,15 @@ import { createProjectTask,deleteProjectTask,updateProjectTask,listProjectTasks 
 export async function getTasks(req,res) {
     const userId = req.user.id;
     const {orgId,projectId} = req.params;
+    if (req.query.offset !== undefined) {
+        console.warn("Offset pagination is deprecated. Use cursor instead.");
+    }
     try {
-        const limit = Math.min(parseInt(req.params.limit) || 20,100);
-        const offset = parseInt(req.params.offset) || 0;
-        const tasks = await listProjectTasks(userId,orgId,projectId, {limit,offset});
+        const limit = Math.min(parseInt(req.query.limit) || 20,100);
+        const cursor = req.query.cursor || null;
+        const tasks = await listProjectTasks(userId,orgId,projectId, {limit,cursor});
+        
+
 
         return res.json(tasks);
     } catch (err) {
