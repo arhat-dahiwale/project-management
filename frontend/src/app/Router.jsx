@@ -1,11 +1,14 @@
 // frontend/src/app/Router.jsx
 
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { LoginPage } from "../auth/pages/LoginPage.jsx";
 import { RegisterPage } from "../auth/pages/RegisterPage.jsx";
 import {OrganizationsPage} from "../organizations/pages/OrganizationsPage.jsx"
+import { ProjectsPage } from "../projects/pages/ProjectsPage.jsx";
+import { ProjectDetailsPage } from "../projects/pages/ProjectDetailsPage.jsx";
 import { ProtectedRoute } from "./routes/ProtectedRoute.jsx";
 import { PublicRoute } from "./routes/PublicRoute.jsx";
+import { AppLayout } from "./AppLayout.jsx";
 
 
 export function AppRouter() {
@@ -29,15 +32,22 @@ export function AppRouter() {
                         </PublicRoute>
                     }
                 />
-
-                <Route 
-                    path="/organizations"
+                
+                <Route
                     element={
                         <ProtectedRoute>
-                            <OrganizationsPage />
+                        <AppLayout />
                         </ProtectedRoute>
-                    }   
-                />
+                    }
+                    >
+                    {/* Default redirect: / -> /organizations */}
+                    <Route path="/" element={<Navigate to="/organizations" replace />} />
+                    <Route path="/organizations" element={<OrganizationsPage />} />
+                    <Route path="/projects" element={<ProjectsPage />} />
+                    <Route path="/projects/:projectId" element={<ProjectDetailsPage />} />
+                </Route>
+
+                <Route path="*" element={<Navigate to="/login" replace />} />
                     
             </Routes>
         </BrowserRouter>

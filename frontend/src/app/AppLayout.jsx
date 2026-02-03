@@ -1,0 +1,120 @@
+// frontend/src/app/AppLayout.jsx
+
+import React from "react";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { OrgSwitcher } from "../organizations/components/OrgSwitcher";
+import { Button } from "../shared/components/Button";
+
+export function AppLayout() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  
+  const containerStyle = {
+    display: "flex",
+    height: "100vh",
+    width: "100vw",
+    overflow: "hidden"
+  };
+
+  const sidebarStyle = {
+    width: "260px",
+    backgroundColor: "var(--gray-900)",
+    color: "white",
+    display: "flex",
+    flexDirection: "column",
+    borderRight: "1px solid var(--gray-800)",
+    flexShrink: 0
+  };
+
+  const mainStyle = {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+    backgroundColor: "var(--gray-50)"
+  };
+
+  const headerStyle = {
+    height: "64px",
+    backgroundColor: "white",
+    borderBottom: "1px solid var(--gray-200)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    padding: "0 2rem",
+    flexShrink: 0
+  };
+
+  const contentStyle = {
+    flex: 1,
+    overflow: "auto",
+    padding: "2rem"
+  };
+
+  
+  const NavItem = ({ to, icon, label }) => (
+    <NavLink 
+      to={to} 
+      style={({ isActive }) => ({
+        display: "flex",
+        alignItems: "center",
+        padding: "0.75rem 1rem",
+        margin: "0.25rem 0.75rem",
+        borderRadius: "var(--radius-md)",
+        color: isActive ? "white" : "var(--gray-400)",
+        backgroundColor: isActive ? "var(--primary-700)" : "transparent",
+        fontWeight: isActive ? 500 : 400,
+        transition: "all 0.2s"
+      })}
+    >
+      <span style={{ marginRight: "0.75rem" }}>{icon}</span>
+      {label}
+    </NavLink>
+  );
+
+  return (
+    <div style={containerStyle}>
+      {/* SIDEBAR */}
+      <aside style={sidebarStyle}>
+        <div style={{ padding: "1.5rem", fontSize: "1.25rem", fontWeight: "bold", letterSpacing: "-0.025em" }}>
+          <span style={{ color: "var(--primary-500)" }}>PM</span> Tool
+        </div>
+        
+        <OrgSwitcher />
+
+        <nav style={{ flex: 1, marginTop: "1rem" }}>
+          <NavItem to="/organizations" icon="🏢" label="Overview" />
+          <NavItem to="/projects" icon="📁" label="Projects" />
+        </nav>
+
+        <div style={{ padding: "1.5rem", borderTop: "1px solid var(--gray-800)" }}>
+          <div style={{ fontSize: "0.875rem", marginBottom: "0.5rem", color: "var(--gray-400)" }}>
+            {user?.email}
+          </div>
+          <Button variant="secondary" onClick={handleLogout} style={{ width: "100%", fontSize: "0.8rem" }}>
+            Sign Out
+          </Button>
+        </div>
+      </aside>
+
+      {/* MAIN CONTENT AREA */}
+      <main style={mainStyle}>
+        {/* Header (optional, good for breadcrumbs later) */}
+        <header style={headerStyle}>
+          {/* We can put user profile or notifications here */}
+        </header>
+
+        <div style={contentStyle}>
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  );
+}
