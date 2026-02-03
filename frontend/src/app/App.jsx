@@ -1,4 +1,5 @@
-import { useState } from "react";
+// frontend/src/app/App.jsx
+
 import { AppProviders } from "./AppProvider";
 import { AppRouter } from "./Router";
 

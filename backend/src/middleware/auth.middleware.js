@@ -1,15 +1,15 @@
-// auth.middleware.js
+// backend/src/middleware/auth.middleware.js
 import jwt from "jsonwebtoken";
 
 export function authMiddleware(req,res,next) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-        return res.status(401).json({error:"Missing authorization header"});
+        return res.status(401).json({error:"MISSING_AUTHOZATION_HEADER"});
     }
 
     if (!authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "Invalid authorization format" });
+        return res.status(401).json({ error: "INVALID_AUTHORIZATION_FORMAT" });
     }
 
     const token = authHeader.split(" ")[1];
@@ -19,7 +19,8 @@ export function authMiddleware(req,res,next) {
         req.user = {id:payload.userId};
         next();
     } catch {
-        return res.status(401).json({error:"Invalid or expired token"});
+        res.setHeader("Content-Type", "application/json");
+        return res.status(401).json({ error: "AUTH_TOKEN_INVALID" });
     }
 
 }

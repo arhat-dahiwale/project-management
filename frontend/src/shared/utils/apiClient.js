@@ -1,3 +1,5 @@
+// frontend/src/shared/utils/apiClient.js
+
 import { getToken } from "./storage";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -37,16 +39,28 @@ export async function apiClient(endpoint, options={}) {
     }
 
     if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText||"Request Failed");
+        let error;
+        try {
+            error = await response.json();
+        } catch {
+            error = { message: "REQUEST_FAILED" };
+        }
+
+        throw {
+            status: response.status,
+            message: error.error || error.message || "REQUEST_FAILED",
+        };
+    }
+
+    if (response.status === 204) {
+        return null;
     }
 
     const contentType = response.headers.get("Content-Type");
-
     if (contentType && contentType.includes("application/json")) {
         return response.json();
     }
 
-    return null;    
+    return response.text();    
 }
 

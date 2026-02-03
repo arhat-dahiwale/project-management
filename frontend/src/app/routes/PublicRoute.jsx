@@ -1,11 +1,14 @@
+// frontend/src/app/routes/PublicRoute.jsx
+
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { Spinner } from "../../shared/components/Spinner.jsx"
 
 export function PublicRoute({children}) {
     const {status} = useAuth();
 
     if (status=== "checking") {
-        return <p>Loading...</p>;
+        return <Spinner />
     }
 
     if (status === "authenticated") {

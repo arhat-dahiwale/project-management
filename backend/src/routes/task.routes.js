@@ -1,15 +1,15 @@
-// task.routes.js
+// backend/src/routes/task.routes.js
 
 import express from "express";
 import { getTasks,updateTask,removeTask,createTask } from "../controllers/task.controller.js";
-import {authMiddleware} from "../middleware/auth.middleware.js";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
-router.get("/tasks",authMiddleware, getTasks);
-router.post("/tasks",authMiddleware, createTask);
-router.put("/tasks/:taskId",authMiddleware,updateTask);
-router.delete("/tasks/:taskId",authMiddleware, removeTask);
+
+router.get("/",getTasks);
+router.post("/", createTask);
+router.patch("/:taskId",updateTask);
+router.delete("/:taskId", removeTask);
 
 export default router;
 

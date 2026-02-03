@@ -1,36 +1,50 @@
-// task.repository.js
+// backend/src/repositories/task.repository.js
 import pool from "../db/index.js";
 
-export async function listTasksByProject(projectId, {limit,cursor}) {
+export async function listTasksByProject(projectId, { limit = 20, cursor } = {}) {
     const params = [projectId];
-    let cursorCondition = "";
+    const conditions = ["project_id = $1", "deleted_at IS NULL"];
+
     if (cursor) {
         params.push(cursor);
-        cursorCondition = `AND created_at < $2`;
+        conditions.push(`created_at < $${params.length}`); 
     }
+
     params.push(limit);
+    const limitIndex = params.length; 
 
-    const result = await pool.query(
-        `SELECT id, title, status, description, created_at
-        FROM tasks 
-        WHERE project_id=$1 AND deleted_at IS NULL ${cursorCondition}
+    const query = `
+        SELECT id, title, status, description, created_at
+        FROM tasks
+        WHERE ${conditions.join(" AND ")}
         ORDER BY created_at DESC
-        LIMIT $${params.length}`,
-        params
-    );
+        LIMIT $${limitIndex}
+    `;
 
+    const result = await pool.query(query, params);
     return result.rows;
 }
 
 export async function createTask(projectId, title, description,status) {
     const result = await pool.query(
-        `INSERT INTO tasks(project_id,title,status,description)
-        VALUES ($1,$2,$3,$4)
+        `INSERT INTO tasks(id,project_id,title,status,description)
+        VALUES (gen_random_uuid(),$1,$2,$3,$4)
         RETURNING id,title,status,created_at,description`,
         [projectId,title,status,description]
     );
 
     return result.rows[0];
+}
+
+export async function getTaskById(projectId,taskId) {
+    const result = await pool.query(
+        `SELECT id, project_id, title, status, description, created_at 
+         FROM tasks 
+         WHERE id = $1 AND project_id = $2 AND deleted_at IS NULL`,
+        [taskId, projectId]
+    );
+    
+    return result.rows[0] || null;
 }
 
 /*
@@ -53,7 +67,7 @@ export async function deleteTask(projectId,taskId) {
     const result = await pool.query(
         `UPDATE tasks 
         SET deleted_at=now()
-        WHERE id=$1 AND project_id=$2 AND deleted_at=NULL
+        WHERE id=$1 AND project_id=$2 AND deleted_at IS NULL
         RETURNING id`,
         [taskId,projectId]
     );

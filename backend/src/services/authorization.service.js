@@ -1,4 +1,4 @@
-// authorization.service.js
+// backend/src/services/authorization.service.js
 import {getMembership} from "../repositories/membership.repository.js";
 
 export async function requireOrgRole(userId, orgId, allowedRoles) {

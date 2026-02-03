@@ -1,12 +1,11 @@
-// task.controller.js
+// backend/src/constrollers/task.controller.js
 import { createProjectTask,deleteProjectTask,updateProjectTask,listProjectTasks } from "../services/task.service.js";
 
 export async function getTasks(req,res) {
     const userId = req.user.id;
     const {orgId,projectId} = req.params;
-    if (req.query.offset !== undefined) {
-        console.warn("Offset pagination is deprecated. Use cursor instead.");
-    }
+
+    
     try {
         const limit = Math.min(parseInt(req.query.limit) || 20,100);
         const cursor = req.query.cursor || null;
@@ -16,9 +15,7 @@ export async function getTasks(req,res) {
 
         return res.json(tasks);
     } catch (err) {
-        if (err?.code === "TASK_NOT_FOUND") {
-            return res.status(404).json({error:err.code});
-        }
+        
         if (err?.code === "NOT_A_MEMBER" || err?.code === "INSUFFICIENT_ROLE") {
             return res.status(403).json({ error: err.code });
         }
@@ -40,13 +37,13 @@ export async function createTask(req,res) {
     const {orgId,projectId} = req.params;
     const {title,description} = req.body;
 
-    if (!title || !description) {
-        return res.status(400).json({error:"Enter required fields"});
+    if (!title || typeof title !== "string") {
+        return res.status(400).json({error:"INVALID_TASK_INPUT"});
     }
 
     try {
-        const task = await createProjectTask(userId,orgId,projectId,title,description);
-        return res.json(task);
+        const task = await createProjectTask(userId,orgId,projectId,title,description ?? null);
+        return res.status(201).json(task);
     } catch (err) {
         if (err?.code === "TASK_NOT_FOUND") {
             return res.status(404).json({error:err.code});
@@ -67,8 +64,8 @@ export async function updateTask(req,res) {
     const {orgId,projectId,taskId} = req.params;
     const {title,description,status} = req.body;
 
-    if (!title || !description || !status) {
-        return res.status(400).json({error:"Enter required fields"});
+    if (typeof title !== "string" || typeof status !== "string") {
+        return res.status(400).json({error:"INVALID_TASK_UPDATE"});
     }
 
     try {

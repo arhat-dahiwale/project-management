@@ -1,6 +1,10 @@
+// frontend/src/context/AuthContext.jsx
+
 import { useContext, useState, createContext, useEffect } from "react";
 import { getToken, saveToken, removeToken } from "../shared/utils/storage";
 import { setAuthFailureHandler } from "../shared/utils/apiClient";
+import { getCurrentUser } from "../auth/auth.api";
+
 
 const initialAuthState = {
     status:"checking",
@@ -14,21 +18,50 @@ export function AuthProvider({children}) {
     const [auth,setAuth] = useState(initialAuthState);
 
     useEffect(() => {
-        const tokenFromStorage = getToken();
-        if (!tokenFromStorage) {
+        let cancelled = false;
+
+        async function bootstrapAuth() {
+            const tokenFromStorage = getToken();
+
+            if (!tokenFromStorage) {
             setAuth({
-                status:"unauthenticated",
-                user:null,
-                token:null,
+                status: "unauthenticated",
+                user: null,
+                token: null,
             });
-        } else {
+            return;
+            }
+
+            try {
+            const user = await getCurrentUser();
+
+            if (cancelled) return;
+
             setAuth({
-                status:"authenticated",
-                user:null,
-                token:tokenFromStorage,
-            })
+                status: "authenticated",
+                user,
+                token: tokenFromStorage,
+            });
+            } catch (err) {
+            removeToken();
+
+            if (cancelled) return;
+
+            setAuth({
+                status: "unauthenticated",
+                user: null,
+                token: null,
+            });
+            }
         }
-    },[]);
+
+        bootstrapAuth();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
 
     
 

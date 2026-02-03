@@ -1,20 +1,32 @@
-// server.js
+// backend/src/server.js
 import express from "express";
 import "dotenv/config";
+import cors from "cors";
 import pool from "./db/index.js"
-import authRoutes from "./routes/auth.routes.js"
-import { authMiddleware } from "./middleware/auth.middleware.js";
+import authRoutes from "./routes/auth.routes.js";
+import organizationRoutes from "./routes/organization.routes.js";
+import membershipRoutes from "./routes/membership.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import taskRoutes from "./routes/task.routes.js";
+import { authMiddleware } from "./middleware/auth.middleware.js";
+
 
 const app = express();
+
+app.use(cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173", 
+    credentials: true 
+}));
 
 app.use(express.json());
 
 
 app.use("/auth",authRoutes);
-app.use("/orgs", projectRoutes);
-app.use("/orgs/:orgId/projects/:projectId", taskRoutes);
+app.use("/organizations", authMiddleware, organizationRoutes);
+app.use("/organizations/:orgId/members", authMiddleware, membershipRoutes);
+app.use("/organizations/:orgId/projects", authMiddleware, projectRoutes);
+app.use("/organizations/:orgId/projects/:projectId/tasks", authMiddleware, taskRoutes);
+
 
 app.get("/health", async (req,res) => {
     try {

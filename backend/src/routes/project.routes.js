@@ -1,11 +1,20 @@
-// project.routes.js
+// backend/src/routes/project.routes.js
+
 import express from "express";
-import { authMiddleware } from "../middleware/auth.middleware.js";
-import { createProject, listProjects } from "../controllers/project.controller.js";
+import {
+  createProject,
+  listProjects,
+  getProject,
+  updateProject,
+  deleteProject,
+} from "../controllers/project.controller.js";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
-router.post("/:orgId/projects",authMiddleware,createProject);
-router.get("/:orgId/projects", authMiddleware,listProjects);
+router.post("/", createProject);
+router.get("/", listProjects);
+router.get("/:projectId", getProject);
+router.patch("/:projectId",updateProject);
+router.delete("/:projectId", deleteProject);
 
-export default router; 
+export default router;

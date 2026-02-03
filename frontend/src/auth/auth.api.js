@@ -1,10 +1,15 @@
+// frontend/src/auth/auth.api.js
+
 import {apiClient} from "../shared/utils/apiClient.js";
+import { loginSchema } from "./auth.schemas.js";
 
 export function login(credentials) {
-    return apiClient("/auth/login",{
-        method:"POST",
-        body:JSON.stringify(credentials),
-    });
+  loginSchema.parse(credentials); // throws early if invalid
+
+  return apiClient("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(credentials),
+  });
 }
 
 

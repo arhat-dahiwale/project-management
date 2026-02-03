@@ -1,10 +1,17 @@
-import { AuthProvider } from "../context/AuthContext";
-// import { OrgProvider } from "../context/OrgContext"; // later
+// frontend/src/app/AppProvider.jsx
 
-export function AppProviders({ children }) {
+import { AuthProvider } from "../context/AuthContext";
+import { OrgProvider } from "../context/OrgContext"; 
+import { ProjectProvider, projectProvider } from "../context/projectContext";
+
+export default function AppProviders({ children }) {
   return (
     <AuthProvider>
-      {children}
+      <OrgProvider>
+        <ProjectProvider>
+          {children}
+        </ProjectProvider>
+      </OrgProvider>
     </AuthProvider>
   );
 }
