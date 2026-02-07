@@ -5,10 +5,16 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { OrgSwitcher } from "../organizations/components/OrgSwitcher";
 import { Button } from "../shared/components/Button";
+import { useLocation } from "react-router-dom";
+
 
 export function AppLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isOrgScopedRoute = location.pathname.startsWith("/organizations/") && location.pathname !== "/organizations";
+
 
   const handleLogout = () => {
     logout();
@@ -87,11 +93,11 @@ export function AppLayout() {
           <span style={{ color: "var(--primary-500)" }}>PM</span> Tool
         </div>
         
-        <OrgSwitcher />
+        {isOrgScopedRoute && <OrgSwitcher /> }
 
         <nav style={{ flex: 1, marginTop: "1rem" }}>
           <NavItem to="/organizations" icon="🏢" label="Overview" />
-          <NavItem to="/projects" icon="📁" label="Projects" />
+          
         </nav>
 
         <div style={{ padding: "1.5rem", borderTop: "1px solid var(--gray-800)" }}>

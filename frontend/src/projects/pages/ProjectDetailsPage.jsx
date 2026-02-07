@@ -3,21 +3,26 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useTasks } from "../../tasks/hooks/useTasks";
 import { useOrgContext } from "../../context/OrgContext";
-import { useProjectContext } from "../../context/projectContext"; // To get project name
+import { useProjectContext } from "../../context/projectContext"; 
 import { TaskList } from "../../tasks/components/TaskList";
 import { Button } from "../../shared/components/Button";
 import { Modal } from "../../shared/components/Modal";
 import { Input } from "../../shared/components/Input";
 import { Spinner } from "../../shared/components/Spinner";
 import { ErrorMessage } from "../../shared/components/ErrorMessage";
+import * as projectsApi from "../projects.api";
+
 
 export function ProjectDetailsPage() {
   const { projectId } = useParams();
   const { activeOrg } = useOrgContext();
   const { projects } = useProjectContext();
-  
-  
-  const currentProject = projects.find(p => p.id === projectId);
+
+  const [project, setProject] = useState(null);
+  const [projectLoading, setProjectLoading] = useState(true);
+  const [projectError, setProjectError] = useState(null);
+
+  const currentProject = project;
   
   const { 
     tasks, 
@@ -26,7 +31,7 @@ export function ProjectDetailsPage() {
     createTask, 
     updateTask, 
     deleteTask 
-  } = useTasks(activeOrg?.id, projectId);
+  } = useTasks(project ? activeOrg?.id : null, project ? projectId:null );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
@@ -69,15 +74,60 @@ export function ProjectDetailsPage() {
 
   const boardStyle = {
     display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)", // 3 Columns fixed
+    gridTemplateColumns: "repeat(3, 1fr)",
     gap: "1.5rem",
     flex: 1,
     overflowX: "auto",
     paddingBottom: "1rem"
   };
 
+  useEffect(() => {
+    async function resolveProject() {
+      if (!activeOrg?.id || !projectId) return;
+
+      const fromContext = projects.find(p => p.id === projectId);
+      if (fromContext) {
+        setProject(fromContext);
+        setProjectLoading(false);
+        return;
+      }
+
+      try {
+        setProjectError(null);
+        setProjectLoading(true);
+        const fetched = await projectsApi.getProjectById(
+          activeOrg.id,
+          projectId
+        );
+        setProject(fetched);
+      } catch (err) {
+        setProjectError(err);
+      } finally {
+        setProjectLoading(false);
+      }
+    }
+
+    resolveProject();
+  }, [activeOrg, projectId, projects]);
+
+
   if (!activeOrg) return <div>Select an Organization</div>;
-  if (isLoading && tasks.length === 0) return <div style={{ padding: "2rem", textAlign: "center" }}><Spinner /></div>;
+  if (projectLoading) {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (projectError) {
+    return (
+      <div style={{ padding: "2rem" }}>
+        <ErrorMessage message="Project not found or inaccessible." />
+      </div>
+    );
+  }
+
 
   return (
     <div style={pageContainerStyle}>

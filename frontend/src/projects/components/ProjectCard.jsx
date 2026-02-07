@@ -1,19 +1,28 @@
 // frontend/src/projects/components/ProjectCard.jsx
 import React, { useState } from "react";
 import { Button } from "../../shared/components/Button";
+import { Modal } from "../../shared/components/Modal";
+import { ErrorMessage } from "../../shared/components/ErrorMessage";
 
-export function ProjectCard({ project, onClick, onDelete }) {
+export function ProjectCard({ project, onClick, onDelete, onEdit }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleDelete = async (e) => {
-    e.stopPropagation();
-    if (!window.confirm("Delete this project?")) return;
-    
+  async function handleConfirmDelete() {
     setIsDeleting(true);
-    await onDelete(project.id);
-    setIsDeleting(false);
-  };
+    setError(null);
+
+    try {
+      await onDelete(project.id);
+      setShowConfirm(false);
+    } catch (err) {
+      setError("You don’t have permission to delete this project.");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   const cardStyle = {
     backgroundColor: "white",
@@ -26,7 +35,7 @@ export function ProjectCard({ project, onClick, onDelete }) {
     position: "relative",
     display: "flex",
     flexDirection: "column",
-    height: "180px",
+    height: "140px",
     transform: isHovered ? "translateY(-2px)" : "none"
   };
 
@@ -48,17 +57,56 @@ export function ProjectCard({ project, onClick, onDelete }) {
 
       {isHovered && (
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "auto" }}>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleDelete}
-            isLoading={isDeleting}
-            style={{ color: "var(--danger)", fontSize: "0.8rem" }}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(project);
+            }}
+          >
+            ✎
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowConfirm(true);
+            }}
           >
             Delete
           </Button>
         </div>
       )}
+
+      <Modal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        title="Delete Project"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setShowConfirm(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmDelete}
+              isLoading={isDeleting}
+            >
+              Delete
+            </Button>
+          </>
+        }
+      >
+        <ErrorMessage message={error} />
+        <p>
+          Are you sure you want to permanently delete{" "}
+          <strong>{project.name}</strong>? This action cannot be undone.
+        </p>
+      </Modal>
+
     </div>
   );
 }

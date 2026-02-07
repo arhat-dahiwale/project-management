@@ -3,7 +3,7 @@ import React from "react";
 import { ProjectCard } from "./ProjectCard";
 import { Button } from "../../shared/components/Button";
 
-export function ProjectList({ projects, onOpenProject, onDeleteProject, onCreateClick }) {
+export function ProjectList({ projects, onOpenProject, onDeleteProject,onEditProject, onCreateClick }) {
   const gridStyle = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
@@ -38,6 +38,7 @@ export function ProjectList({ projects, onOpenProject, onDeleteProject, onCreate
           project={project} 
           onClick={onOpenProject} 
           onDelete={onDeleteProject}
+          onEdit={onEditProject}
         />
       ))}
     </div>

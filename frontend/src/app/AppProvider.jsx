@@ -2,9 +2,9 @@
 
 import { AuthProvider } from "../context/AuthContext";
 import { OrgProvider } from "../context/OrgContext"; 
-import { ProjectProvider, projectProvider } from "../context/projectContext";
+import { ProjectProvider } from "../context/projectContext";
 
-export default function AppProviders({ children }) {
+export function AppProvider({ children }) {
   return (
     <AuthProvider>
       <OrgProvider>

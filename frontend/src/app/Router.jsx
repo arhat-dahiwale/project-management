@@ -40,11 +40,10 @@ export function AppRouter() {
                         </ProtectedRoute>
                     }
                     >
-                    {/* Default redirect: / -> /organizations */}
                     <Route path="/" element={<Navigate to="/organizations" replace />} />
                     <Route path="/organizations" element={<OrganizationsPage />} />
-                    <Route path="/projects" element={<ProjectsPage />} />
-                    <Route path="/projects/:projectId" element={<ProjectDetailsPage />} />
+                    <Route path="/organizations/:orgId/projects" element={<ProjectsPage />} />
+                    <Route path="/organizations/:orgId/projects/:projectId" element={<ProjectDetailsPage />} />
                 </Route>
 
                 <Route path="*" element={<Navigate to="/login" replace />} />

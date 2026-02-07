@@ -18,6 +18,7 @@ export async function listUserOrganizations(userId) {
         `SELECT 
             o.id,
             o.name,
+            o.created_at,
             m.role
         FROM organizations o
         JOIN memberships m ON m.organization_id = o.id

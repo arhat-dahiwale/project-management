@@ -6,14 +6,21 @@ import { Modal } from "../../shared/components/Modal";
 import { Input } from "../../shared/components/Input";
 import { ErrorMessage } from "../../shared/components/ErrorMessage";
 import { Spinner } from "../../shared/components/Spinner";
+import { useNavigate } from "react-router-dom";
+
 
 export function OrganizationsPage() {
-  const { orgs, createOrganization, setActiveOrg, isLoading: orgsLoading } = useOrganization();
+  const navigate = useNavigate();
+  const { orgs, createOrganization, updateOrganization, setActiveOrg, isLoading: orgsLoading } = useOrganization();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newOrgName, setNewOrgName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingOrg, setEditingOrg] = useState(null);
+  const [editOrgName, setEditOrgName] = useState("");
+
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -53,12 +60,16 @@ export function OrganizationsPage() {
     padding: "1.5rem",
     boxShadow: "var(--shadow-sm)",
     transition: "transform 0.2s, box-shadow 0.2s",
-    cursor: "pointer"
+    cursor: "pointer",
+    position:"relative"
   };
 
   if (orgsLoading && orgs.length === 0) {
     return <div style={{ display: "flex", justifyContent: "center", marginTop: "4rem" }}><Spinner /></div>;
   }
+
+  
+
 
   return (
     <div>
@@ -81,7 +92,7 @@ export function OrganizationsPage() {
           <div 
             key={org.id} 
             style={cardStyle}
-            onClick={() => setActiveOrg(org.id)}
+            onClick={() => {setActiveOrg(org.id); navigate(`/organizations/${org.id}/projects`);}}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-2px)";
               e.currentTarget.style.boxShadow = "var(--shadow-md)";
@@ -93,6 +104,27 @@ export function OrganizationsPage() {
               e.currentTarget.style.borderColor = "var(--gray-200)";
             }}
           >
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();       
+                setEditingOrg(org);           
+                setEditOrgName(org.name);     
+                setIsEditModalOpen(true);     
+              }}
+              style={{
+                position: "absolute",
+                top: "0.75rem",
+                right: "0.75rem",
+                padding: "0.25rem",
+                color: "var(--gray-400)"
+              }}
+            >
+              ✎
+            </Button>
+
+
             <h3 style={{ fontSize: "1.125rem", fontWeight: "600", marginBottom: "0.5rem" }}>
               {org.name}
             </h3>
@@ -136,6 +168,40 @@ export function OrganizationsPage() {
           />
         </form>
       </Modal>
+
+      {/* EDIT MODAL */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Edit Organization"
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => setIsEditModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={!editingOrg}
+              onClick={async () => {
+                await updateOrganization(editingOrg.id, { name: editOrgName });
+                setIsEditModalOpen(false);
+              }}
+            >
+              Save Changes
+            </Button>
+          </>
+        }
+      >
+        <Input
+          label="Organization Name"
+          value={editOrgName}
+          onChange={(e) => setEditOrgName(e.target.value)}
+          autoFocus
+        />
+      </Modal>
+
     </div>
   );
 }

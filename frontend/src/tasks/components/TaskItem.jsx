@@ -2,11 +2,16 @@
 import React, { useState } from "react";
 import { Button } from "../../shared/components/Button";
 import { Input } from "../../shared/components/Input";
+import { Modal } from "../../shared/components/Modal";
+import { ErrorMessage } from "../../shared/components/ErrorMessage";
 
 export function TaskItem({ task, onUpdate, onDelete }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [error, setError] = useState(null);
+
 
   const [editTitle, setEditTitle] = useState(task.title);
   const [editDesc, setEditDesc] = useState(task.description || "");
@@ -27,16 +32,18 @@ export function TaskItem({ task, onUpdate, onDelete }) {
     }
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm("Delete this task?")) return;
+  async function handleConfirmDelete() {
     setIsDeleting(true);
+    setError(null);
+
     try {
       await onDelete(task.id);
+      setShowConfirm(false);
     } catch (err) {
+      setError("You don’t have permission to delete this task.");
       setIsDeleting(false);
-      alert("Failed to delete");
     }
-  };
+  }
 
   const handleMove = async (newStatus) => {
     setIsSaving(true);
@@ -177,16 +184,43 @@ export function TaskItem({ task, onUpdate, onDelete }) {
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
            {renderMoveControls()}
            
-           <Button 
-            variant="ghost" 
-            onClick={handleDelete} 
-            isLoading={isDeleting}
-            style={{ color: "var(--danger)", padding: "0.25rem 0.5rem", marginLeft: "0.5rem" }}
-          >
-            🗑️
-          </Button>
+           <Button
+            variant="ghost"
+            onClick={() => setShowConfirm(true)}
+            style={{ color: "var(--danger)", padding: "0.25rem 0.5rem" }}
+           >
+              🗑️
+           </Button>
+
         </div>
       </div>
+
+      <Modal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        title="Delete Task"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setShowConfirm(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmDelete}
+              isLoading={isDeleting}
+            >
+              Delete
+            </Button>
+          </>
+        }
+      >
+        <ErrorMessage message={error} />
+        <p>
+          Are you sure you want to permanently delete{" "}
+          <strong>{task.title}</strong>? This action cannot be undone.
+        </p>
+      </Modal>
+
     </div>
   );
 }

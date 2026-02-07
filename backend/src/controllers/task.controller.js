@@ -64,9 +64,14 @@ export async function updateTask(req,res) {
     const {orgId,projectId,taskId} = req.params;
     const {title,description,status} = req.body;
 
-    if (typeof title !== "string" || typeof status !== "string") {
-        return res.status(400).json({error:"INVALID_TASK_UPDATE"});
+    if (
+        (title !== undefined && typeof title !== "string") ||
+        (description !== undefined && description !== null && typeof description !== "string") ||
+        (status !== undefined && typeof status !== "string")
+    ) {
+        return res.status(400).json({ error: "INVALID_TASK_UPDATE" });
     }
+
 
     try {
         const task = await updateProjectTask(userId,orgId,projectId,taskId,title,description,status);
