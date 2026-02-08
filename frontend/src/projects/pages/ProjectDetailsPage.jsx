@@ -88,8 +88,6 @@ export function ProjectDetailsPage() {
       const fromContext = projects.find(p => p.id === projectId);
       if (fromContext) {
         setProject(fromContext);
-        setProjectLoading(false);
-        return;
       }
 
       try {

@@ -85,12 +85,16 @@ export function AppLayout() {
     </NavLink>
   );
 
+  const displayName = user?.email
+  ? user.email.split("@")[0]
+  : user.email;
+
   return (
     <div style={containerStyle}>
       {/* SIDEBAR */}
       <aside style={sidebarStyle}>
         <div style={{ padding: "1.5rem", fontSize: "1.25rem", fontWeight: "bold", letterSpacing: "-0.025em" }}>
-          <span style={{ color: "var(--primary-500)" }}>PM</span> Tool
+          <span style={{ color: "var(--primary-500)" }}>Project Management</span>
         </div>
         
         {isOrgScopedRoute && <OrgSwitcher /> }
@@ -102,9 +106,9 @@ export function AppLayout() {
 
         <div style={{ padding: "1.5rem", borderTop: "1px solid var(--gray-800)" }}>
           <div style={{ fontSize: "0.875rem", marginBottom: "0.5rem", color: "var(--gray-400)" }}>
-            {user?.email}
+            {displayName}
           </div>
-          <Button variant="secondary" onClick={handleLogout} style={{ width: "100%", fontSize: "0.8rem" }}>
+          <Button variant="secondary" onClick={handleLogout} style={{ width: "100%", fontSize: "0.8rem", color:"white" }}>
             Sign Out
           </Button>
         </div>
@@ -112,9 +116,7 @@ export function AppLayout() {
 
       {/* MAIN CONTENT AREA */}
       <main style={mainStyle}>
-        {/* Header (optional, good for breadcrumbs later) */}
         <header style={headerStyle}>
-          {/* We can put user profile or notifications here */}
         </header>
 
         <div style={contentStyle}>
