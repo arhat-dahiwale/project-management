@@ -151,7 +151,7 @@ export function AppLayout() {
           
         </nav>
 
-        <div style={{ padding: "1.5rem", borderTop: "1px solid var(--gray-800)" }}>
+        <div style={{ padding: "1.5rem",paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))", borderTop: "1px solid var(--gray-800)" }}>
           <div style={{ fontSize: "0.875rem", marginBottom: "0.5rem", color: "var(--gray-400)" }}>
             {displayName}
           </div>

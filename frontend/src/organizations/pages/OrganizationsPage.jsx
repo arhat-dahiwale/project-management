@@ -44,7 +44,9 @@ export function OrganizationsPage() {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "2rem"
+    marginBottom: "2rem",
+    gap: "1rem",
+    flexWrap: "wrap"
   };
 
   const gridStyle = {
@@ -82,7 +84,7 @@ export function OrganizationsPage() {
             Manage your teams and workspaces
           </p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
+        <Button onClick={() => setIsModalOpen(true)} style={{ marginTop: "0.5rem" }} >
           + New Organization
         </Button>
       </div>
